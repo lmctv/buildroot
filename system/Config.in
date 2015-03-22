@@ -188,6 +188,44 @@ endif
 
 if BR2_ROOTFS_SKELETON_DEFAULT
 
+config BR2_TARGET_ENABLE_ROOT_LOGIN
+	bool "Enable root login"
+        default "y"
+	help
+	  Enable root login password
+
+if BR2_TARGET_ENABLE_ROOT_LOGIN
+
+choice
+	prompt "Root password input"
+
+config BR2_TARGET_PLAINTEXT_ROOT_PASSWORD
+	bool "cleartext format"
+	help
+	  Set the root password from plaintext input
+
+	  WARNING! WARNING!
+	  The password appears in clear in the .config file, and may appear
+	  in the build log! Avoid using a valuable password if either the
+	  .config file or the build log may be distributed!
+
+config BR2_TARGET_HASHED_ROOT_PASSWORD
+	bool "hashed format"
+	help
+	  Set the root password from prehashed input
+
+	  WARNING! WARNING!
+	  The password's hash appears in the .config file, and may appear
+	  in the build log! Avoid using a valuable password if either
+	  the .config file or the build log may be distributed, or at the
+	  very least use a strong cryptographic hash for your password!
+
+endchoice
+
+endif
+
+if BR2_TARGET_PLAINTEXT_ROOT_PASSWORD
+
 config BR2_TARGET_GENERIC_ROOT_PASSWD
 	string "Root password"
 	default ""
@@ -208,6 +246,34 @@ config BR2_TARGET_GENERIC_ROOT_PASSWD
 	  The password appears in clear in the .config file, and may appear
 	  in the build log! Avoid using a valuable password if either the
 	  .config file or the build log may be distributed!
+endif
+
+if BR2_TARGET_HASHED_ROOT_PASSWORD
+
+config BR2_TARGET_GENERIC_ROOT_PASSWD_HASH
+	string "Hashed root password"
+	default ""
+	help
+	  Set the crypt(3) encoded root password hash.
+
+	  If set to empty (the default), then no root password will be set,
+	  and root will need no password to log in.
+
+	  An hashed root password of "*" will disable root logins.
+
+	  "$" signs in the hashed password must be doubled.
+
+	  For example, the MD5 hash for the password "mypass" salted with
+	  the string "longsalt" is "$1$longsalt$v35DIIeMo4yUfI23yditq0",
+	  which must be written as "$$1$$longsalt$$v35DIIeMo4yUfI23yditq0"
+
+	  WARNING! WARNING!
+	  The password's hash appears in the .config file, and may appear
+	  in the build log! Avoid using a valuable password if either
+	  the .config file or the build log may be distributed, or at the
+	  very least use a strong cryptographic hash for your password!
+
+endif
 
 choice
 	bool "/bin/sh"
