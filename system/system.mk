@@ -87,7 +87,7 @@ define SYSTEM_ROOT_PASSWD
 	$(SED) "s,^root:[^:]*:,root:$$TARGET_GENERIC_ROOT_PASSWD_HASH:," $(TARGET_DIR)/etc/shadow
 endef
 
-else ifeq ($(BR2_TARGET_HASHED_ROOT_PASSWORD),y)
+else ifeq ($(TARGET_HASHED_ROOT_PASSWORD),y)
 
 define SYSTEM_ROOT_PASSWD
 	$(SED) 's,^root:[^:]*:,root:$(TARGET_GENERIC_ROOT_PASSWD_HASH):,' $(TARGET_DIR)/etc/shadow
