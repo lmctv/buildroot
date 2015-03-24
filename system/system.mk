@@ -34,7 +34,7 @@ endef
 TARGET_FINALIZE_HOOKS += SYSTEM_ISSUE
 endif
 
-ifneq ($(TARGET_GENERIC_ROOT_PASSWD),)
+ifneq ($(BR2_TARGET_ENABLE_ROOT_LOGIN),)
 TARGETS += host-mkpasswd
 endif
 
@@ -70,9 +70,25 @@ TARGET_FINALIZE_HOOKS += SET_NETWORK
 ifeq ($(BR2_ROOTFS_SKELETON_DEFAULT),y)
 
 define SYSTEM_ROOT_PASSWD
-	[ -n "$(TARGET_GENERIC_ROOT_PASSWD)" ] && \
-		TARGET_GENERIC_ROOT_PASSWD_HASH=$$($(MKPASSWD) -m "$(TARGET_GENERIC_PASSWD_METHOD)" "$(TARGET_GENERIC_ROOT_PASSWD)"); \
-	$(SED) "s,^root:[^:]*:,root:$$TARGET_GENERIC_ROOT_PASSWD_HASH:," $(TARGET_DIR)/etc/shadow
+	if [ "$(BR2_TARGET_ENABLE_ROOT_LOGIN)" = "y" ]; then \
+		case '$(TARGET_GENERIC_ROOT_PASSWD)' in \
+		("") \
+			ROOT_PASSWD=""; \
+		;; \
+		("$$1$$"*|"$$5$$"*|"$$6$$"*) \
+			ROOT_PASSWD='$(TARGET_GENERIC_ROOT_PASSWD)'; \
+		;; \
+		('*') \
+			ROOT_PASSWD='*'; \
+		;; \
+		(*) \
+			ROOT_PASSWD=$$($(MKPASSWD) -m "$(TARGET_GENERIC_PASSWD_METHOD)" "$(TARGET_GENERIC_ROOT_PASSWD)"); \
+		;; \
+		esac; \
+	else \
+		ROOT_PASSWD='*'; \
+	fi; \
+	$(SED) "s,^root:[^:]*:,root:$${ROOT_PASSWD}:," $(TARGET_DIR)/etc/shadow
 endef
 TARGET_FINALIZE_HOOKS += SYSTEM_ROOT_PASSWD
 
